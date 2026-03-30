@@ -26,6 +26,17 @@ public class SystemController extends BaseController<User> {
     }
 
     /**
+     * 注册页（已登录则回首页）
+     */
+    @GetMapping("/register.html")
+    public String registerPage() {
+        if (!Assert.isEmpty(loginUser)) {
+            return "redirect:/index.html";
+        }
+        return "register";
+    }
+
+    /**
      * 智能医生
      */
     @GetMapping("/doctor")

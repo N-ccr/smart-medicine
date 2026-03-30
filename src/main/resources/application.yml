@@ -11,7 +11,7 @@ spring:
     time-zone: GMT+8
   # 邮件配置
   mail:
-    username: 373675032@qq.com
+    username: 1400034243@qq.com
     password:
     host: smtp.qq.com
     port: 465
@@ -38,7 +38,7 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 # 阿里云通义千问配置
-ai-key: sk-xxxxxxxxxxxxx
+ai-key: sk-f9808cc5dd0f44b1a6da0fff7263de15
 # 阿里云对象存储配置
 oss:
   bucket-name: xxxxxxxxxxx
