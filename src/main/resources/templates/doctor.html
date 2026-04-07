@@ -53,7 +53,7 @@
                                         </div>
                                     </div>
                                     <div class="message-content">
-                                        <div id="messages" style="height: 260px;overflow-y: auto">
+                                        <div id="messages" style="height: 420px;overflow-y: auto">
                                             <div class="msg-received">
                                                 <div class="msg-image">
                                                     <img src="assets/images/team/user-2.jpg" alt="image">
@@ -67,8 +67,9 @@
                                         </div>
 
                                         <div class="msg-reply">
-                                            <textarea id="message" placeholder="输入要咨询的内容..."></textarea>
-                                            <button onclick="send()" class="btn btn-na mt-2 pull-right">发送</button>
+                                            <textarea id="message" style="min-height: 120px;" placeholder="输入要咨询的内容..."></textarea>
+                                            <button type="button" onclick="clearDoctorChat()" class="btn btn-outline-secondary mt-2 pull-left">清空对话</button>
+                                            <button type="button" onclick="send()" class="btn btn-na mt-2 pull-right">发送</button>
                                         </div>
                                     </div>
                                 </div>
@@ -100,9 +101,13 @@
 <script src="common/utils/reg.js"></script>
 <script src="common/layer/layer.js"></script>
 <script src="common/custom.js"></script>
+<script th:inline="javascript">
+    var doctorWelcomeName = [[${session.loginUser.userName}]];
+</script>
+<script>
+    window.onload = function () {
+        loadDoctorHistory();
+    };
+</script>
 </body>
 </html>
-
-<script>
-    window.onload = messageInit;
-</script>

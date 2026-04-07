@@ -452,11 +452,115 @@ function deleteFeedback(id) {
     });
 }
 
+function escapeHtml(s) {
+    if (s == null || s === undefined) {
+        return '';
+    }
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+/**
+ * 用户消息气泡 HTML
+ */
+function doctorUserBubble(text) {
+    return "<div class='msg-received msg-sent' style=\"margin-right: 20px\"><div class='msg-content'><p>现在</p><p class='msg'>" + escapeHtml(text) + "</p></div></div>";
+}
+
+/**
+ * 助手消息气泡 HTML
+ */
+function doctorAssistantBubble(text) {
+    return "<div class=\"msg-received\">\n" +
+        "                   <div class=\"msg-image\">\n" +
+        "                      <img src=\"assets/images/team/user-2.jpg\" alt=\"image\">\n" +
+        "                   </div>\n" +
+        "                   <div class=\"msg-content\">\n" +
+        "                      <p>现在</p>\n" +
+        "                      <p class=\"msg\">\n" + escapeHtml(text) + "\n" +
+        "                      </p>\n" +
+        "                   </div>\n" +
+        "                  </div>";
+}
+
+/**
+ * 从服务端恢复当前会话内的对话（刷新页面后仍可见，且与多轮上下文一致）
+ */
+function loadDoctorHistory() {
+    let $box = $("#messages");
+    if (!$box.length) {
+        return;
+    }
+    $.ajax({
+        type: "GET",
+        url: "message/history",
+        dataType: "json",
+        success: function (data) {
+            if (data['code'] !== 'SUCCESS' || !data['data'] || data['data'].length === 0) {
+                messageInit();
+                return;
+            }
+            $box.empty();
+            let list = data['data'];
+            for (let i = 0; i < list.length; i++) {
+                let item = list[i];
+                if (!item || !item['content']) {
+                    continue;
+                }
+                if (item['role'] === 'user') {
+                    $box.append(doctorUserBubble(item['content']));
+                } else if (item['role'] === 'assistant') {
+                    $box.append(doctorAssistantBubble(item['content']));
+                }
+            }
+            messageInit();
+        },
+        error: function () {
+            messageInit();
+        }
+    });
+}
+
+/**
+ * 清空服务端会话中的对话记忆并刷新展示为欢迎语
+ */
+function clearDoctorChat() {
+    $.ajax({
+        type: "POST",
+        url: "message/clear",
+        dataType: "json",
+        success: function (data) {
+            layer.msg(data['message'] || '已清空');
+            let $box = $("#messages");
+            if (!$box.length) {
+                return;
+            }
+            $box.empty();
+            $box.append(
+                "<div class=\"msg-received\">" +
+                "<div class=\"msg-image\"><img src=\"assets/images/team/user-2.jpg\" alt=\"image\"></div>" +
+                "<div class=\"msg-content\"><p>现在</p><p class=\"msg\" id=\"doctor-welcome-msg\"></p></div></div>"
+            );
+            let name = typeof doctorWelcomeName !== 'undefined' ? doctorWelcomeName : '您';
+            $("#doctor-welcome-msg").text(name + "你好，我是您的智能专属医生助手，身体不舒服或者有任何需要咨询的问题，都可以向我提问，我会尽力为您解答。");
+            messageInit();
+        }
+    });
+}
+
 /**
  * 初始化聊天窗口滚动条
  */
 function messageInit() {
-    let height = $("#messages")[0].scrollHeight;
+    let el = $("#messages")[0];
+    if (!el) {
+        return;
+    }
+    let height = el.scrollHeight;
     $("#messages").scrollTop(height);
 }
 
@@ -468,7 +572,7 @@ function send() {
     if (!message) {
         return;
     }
-    $('#messages').append("<div class='msg-received msg-sent' style=\"margin-right: 20px\"><div class='msg-content'><p>现在</p><p class='msg'>" + message + "</p></div></div>");
+    $('#messages').append(doctorUserBubble(message));
     messageInit();
     $('#message').val('');
     $.ajax({
@@ -481,17 +585,10 @@ function send() {
         success: function (data) {
             if (data['code'] === 'SUCCESS') {
                 message = data['message'];
-                $('#messages').append("<div class=\"msg-received\">\n" +
-                    "                   <div class=\"msg-image\">\n" +
-                    "                      <img src=\"assets/images/team/user-2.jpg\" alt=\"image\">\n" +
-                    "                   </div>\n" +
-                    "                   <div class=\"msg-content\">\n" +
-                    "                      <p>现在</p>\n" +
-                    "                      <p class=\"msg\">\n" + message +
-                    "                      </p>\n" +
-                    "                   </div>\n" +
-                    "                  </div>");
+                $('#messages').append(doctorAssistantBubble(message));
                 messageInit();
+            } else {
+                layer.msg(data['message'] || '发送失败');
             }
         }
     });

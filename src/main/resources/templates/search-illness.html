@@ -47,7 +47,7 @@
                         </p>
                     </div>
                     <ul class="border-top border-light-c">
-                        <li>[[${#dates.format(illnessOne.create_time,'yyyy-MM-dd HH:mm:ss')}]] | <a th:href="@{findIllness(kind=${illnessOne.kindName eq '暂无归属类'}?null:${illnessOne.kind_id})}">[[${illnessOne.kindName}]]</a></li>
+                        <li><a th:href="@{findIllness(kind=${illnessOne.kindName eq '暂无归属类'}?null:${illnessOne.kind_id})}">[[${illnessOne.kindName}]]</a></li>
                         <li style="float: right"><i class="fa fa-eye" aria-hidden="true"></i>[[${illnessOne.pageview}]]</li>
                     </ul>
                 </div>
